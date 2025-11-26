@@ -87,6 +87,8 @@ class Obra(models.Model):
     
     tipo = models.CharField(max_length=20, choices=TipoObra.choices, verbose_name="Tipo")
     status = models.CharField(max_length=20, choices=StatusObra.choices, verbose_name="Status")
+    onde_assistir = models.CharField(max_length=255, null=True, blank=True, verbose_name="Onde Assistir")
+    comentario = models.TextField(max_length=2000, null=True, blank=True, verbose_name="Comentário")
     
     # Relacionamentos
     diretores = models.ManyToManyField(Diretor, related_name='obras', blank=True)
@@ -137,3 +139,36 @@ class Avaliacao(models.Model):
 
     def __str__(self):
         return f'Nota {self.nota} para {self.obra}'
+
+class Lista(models.Model):
+    class TipoLista(models.TextChoices):
+        FAVORITOS = 'FAVORITOS', 'Favoritos'
+        ASSISTIDOS = 'ASSISTIDOS', 'Assistidos'
+        QUERO_VER = 'QUERO_VER', 'Quero Ver'
+        PERSONALIZADA = 'PERSONALIZADA', 'Personalizada'
+        
+    nome = models.CharField(max_length=255, verbose_name="Nome da Lista")
+    descricao = models.TextField(max_length=1000, null=True, blank=True, verbose_name="Descrição")
+
+    tipo = models.CharField(
+        max_length=20, 
+        choices=TipoLista.choices, 
+        null=True, blank=True, 
+        verbose_name="Tipo"
+    )
+    
+    ordem = models.IntegerField(null=True, blank=True, verbose_name="Ordem")
+    
+    # Relacionamento com Obras (ManyToMany)
+    obras = models.ManyToManyField(Obra, related_name='listas', blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'listas'
+        verbose_name = 'Lista'
+        verbose_name_plural = 'Listas'
+        
+    def __str__(self):
+        return self.nome

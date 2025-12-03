@@ -1,20 +1,20 @@
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
-    Calendar,
-    Check,
-    Film,
-    Loader2,
-    Plus,
-    Search,
-    Star,
-    Tv,
+  Calendar,
+  Check,
+  Film,
+  Loader2,
+  Plus,
+  Search,
+  Star,
+  Tv,
 } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -59,7 +59,7 @@ const TmdbSearchModal = ({
     setSelectedItem(item.id);
     try {
       const details = await tmdbService.getDetails(item.id, item.mediaType);
-      
+
       setSelectedDetails({
         ...details,
         mediaType: item.mediaType,

@@ -8,7 +8,12 @@ from integrations.tmdb.client import TMDBClient
 
 
 class ObraViewSet(viewsets.ModelViewSet):
-    queryset = Obra.objects.all()
+    queryset = Obra.objects.prefetch_related(
+        'diretores', 
+        'generos', 
+        'plataformas', 
+        'tags'
+    ).all()
     serializer_class = ObraSerializer
 
     def __init__(self, *args, **kwargs):

@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Search, Filter, Grid3x3, List, Star, Calendar, Film, Tv, Eye } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import obrasService from '../services/obrasService';
-import generosService from '../services/generosService';
-import plataformasService from '../services/plataformasService';
-import tagsService from '../services/tagsService';
-import diretoresService from '../services/diretoresService';
+import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
+import { Calendar, Eye, Film, Filter, Grid3x3, List, Search, Star, Tv } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import ObraDetailsModal from '../components/ObraDetailsModal';
 import ObraModal from '../components/ObraModal';
 import { STATUS_OPTIONS } from '../constants/status';
-import toast from 'react-hot-toast';
+import diretoresService from '../services/diretoresService';
+import generosService from '../services/generosService';
+import obrasService from '../services/obrasService';
+import plataformasService from '../services/plataformasService';
+import tagsService from '../services/tagsService';
 
 const Biblioteca = () => {
   const [obras, setObras] = useState([]);
@@ -76,25 +76,25 @@ const Biblioteca = () => {
 
     if (selectedGenero) {
       result = result.filter(obra =>
-        obra.generos?.some(g => g.id === parseInt(selectedGenero))
+        (obra.generos_info || obra.generos)?.some(g => g.id == selectedGenero)
       );
     }
 
     if (selectedPlataforma) {
       result = result.filter(obra =>
-        obra.plataformas?.some(p => p.id === parseInt(selectedPlataforma))
+        (obra.plataformas_info || obra.plataformas)?.some(p => p.id == selectedPlataforma)
       );
     }
 
     if (selectedTag) {
       result = result.filter(obra =>
-        obra.tags?.some(t => t.id === parseInt(selectedTag))
+        (obra.tags_info || obra.tags)?.some(t => t.id == selectedTag)
       );
     }
 
     if (selectedDiretor) {
       result = result.filter(obra =>
-        obra.diretores?.some(d => d.id === parseInt(selectedDiretor))
+        (obra.diretores_info || obra.diretores)?.some(d => d.id == selectedDiretor)
       );
     }
 
@@ -234,7 +234,7 @@ const Biblioteca = () => {
               >
                 <option value="">Todos os gêneros</option>
                 {generos.map(genero => (
-                  <option key={genero.id} value={genero.id}>{genero.nome}</option>
+                  <option key={genero.id} value={genero.id}>{genero.nome || genero.name}</option>
                 ))}
               </select>
 
@@ -245,7 +245,7 @@ const Biblioteca = () => {
               >
                 <option value="">Todas as plataformas</option>
                 {plataformas.map(plataforma => (
-                  <option key={plataforma.id} value={plataforma.id}>{plataforma.nome}</option>
+                  <option key={plataforma.id} value={plataforma.id}>{plataforma.nome || plataforma.name}</option>
                 ))}
               </select>
 
@@ -256,7 +256,7 @@ const Biblioteca = () => {
               >
                 <option value="">Todas as tags</option>
                 {tags.map(tag => (
-                  <option key={tag.id} value={tag.id}>{tag.nome}</option>
+                  <option key={tag.id} value={tag.id}>{tag.nome || tag.name}</option>
                 ))}
               </select>
 
@@ -267,7 +267,7 @@ const Biblioteca = () => {
               >
                 <option value="">Todos os diretores</option>
                 {diretores.map(diretor => (
-                  <option key={diretor.id} value={diretor.id}>{diretor.nome}</option>
+                  <option key={diretor.id} value={diretor.id}>{diretor.nome || diretor.name}</option>
                 ))}
               </select>
 
@@ -446,9 +446,9 @@ const Biblioteca = () => {
                     </div>
                   </div>
 
-                  {obra.generos && obra.generos.length > 0 && (
+                  {(obra.generos_info || obra.generos) && (obra.generos_info || obra.generos).length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2">
-                      {obra.generos.slice(0, 3).map(genero => (
+                      {(obra.generos_info || obra.generos).slice(0, 3).map(genero => (
                         <Badge
                           key={genero.id}
                           variant="secondary"

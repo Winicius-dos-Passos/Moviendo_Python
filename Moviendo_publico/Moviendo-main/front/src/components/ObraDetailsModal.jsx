@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -125,9 +124,6 @@ const ObraDetailsModal = ({
                 )}
                 {obra.titulo}
               </DialogTitle>
-              <DialogDescription className="text-gray-400">
-                Detalhes da obra {obra.titulo}
-              </DialogDescription>
               <div className="flex gap-2">
                 {onEdit && (
                   <Button
@@ -195,42 +191,46 @@ const ObraDetailsModal = ({
                   )}
                 </div>
 
-                {obra.generos && obra.generos.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-400 mb-2">
-                      Gêneros
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {obra.generos.map((genero) => (
-                        <Badge
-                          key={genero.id}
-                          variant="outline"
-                          className="border-purple-500 text-purple-300"
-                        >
-                          {genero.nome}
-                        </Badge>
-                      ))}
+                {(obra.generos_info || obra.generos) &&
+                  (obra.generos_info || obra.generos).length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                        Gêneros
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(obra.generos_info || obra.generos).map((genero) => (
+                          <Badge
+                            key={genero.id}
+                            variant="outline"
+                            className="border-purple-500 text-purple-300"
+                          >
+                            {genero.nome}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {obra.diretores && obra.diretores.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold text-gray-400 mb-2">
-                      Diretor(es)
-                    </h4>
-                    <div className="flex flex-wrap gap-2">
-                      {obra.diretores.map((diretor) => (
-                        <Badge
-                          key={diretor.id}
-                          className="bg-gray-800 text-gray-300"
-                        >
-                          {diretor.nome}
-                        </Badge>
-                      ))}
+                {(obra.diretores_info || obra.diretores) &&
+                  (obra.diretores_info || obra.diretores).length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-gray-400 mb-2">
+                        Diretor(es)
+                      </h4>
+                      <div className="flex flex-wrap gap-2">
+                        {(obra.diretores_info || obra.diretores).map(
+                          (diretor) => (
+                            <Badge
+                              key={diretor.id}
+                              className="bg-gray-800 text-gray-300"
+                            >
+                              {diretor.nome}
+                            </Badge>
+                          )
+                        )}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
               </div>
             </div>
 
@@ -367,18 +367,21 @@ const ObraDetailsModal = ({
               )}
             </div>
 
-            {obra.tags && obra.tags.length > 0 && (
-              <div className="border-t border-gray-800 pt-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Tags</h3>
-                <div className="flex flex-wrap gap-2">
-                  {obra.tags.map((tag) => (
-                    <Badge key={tag.id} className="bg-gray-800 text-gray-300">
-                      {tag.nome}
-                    </Badge>
-                  ))}
+            {(obra.tags_info || obra.tags) &&
+              (obra.tags_info || obra.tags).length > 0 && (
+                <div className="border-t border-gray-800 pt-6">
+                  <h3 className="text-lg font-semibold text-white mb-3">
+                    Tags
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(obra.tags_info || obra.tags).map((tag) => (
+                      <Badge key={tag.id} className="bg-gray-800 text-gray-300">
+                        {tag.nome}
+                      </Badge>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </DialogContent>
       </Dialog>

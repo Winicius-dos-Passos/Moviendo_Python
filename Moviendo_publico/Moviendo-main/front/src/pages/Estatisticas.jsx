@@ -1,29 +1,28 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { BarChart3, TrendingUp, Film, Star, Clock, Calendar, Award } from 'lucide-react';
-import obrasService from '../services/obrasService';
-import avaliacoesService from '../services/avaliacoesService';
-import toast from 'react-hot-toast';
+import { motion } from "framer-motion";
+import {
+  Award,
+  BarChart3,
+  Calendar,
+  Clock,
+  Film,
+  TrendingUp,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import obrasService from "../services/obrasService";
 
 const Estatisticas = () => {
   const [obras, setObras] = useState([]);
-  const [avaliacoes, setAvaliacoes] = useState([]);
   const [loading, setLoading] = useState(true);
-
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [obrasData, avaliacoesData] = await Promise.all([
-          obrasService.getAll(),
-          avaliacoesService.getAll(),
-        ]);
-        
+        const obrasData = await obrasService.getAll();
         setObras(obrasData);
-        setAvaliacoes(avaliacoesData);
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        toast.error('Erro ao carregar estatísticas');
+        console.error("Erro ao carregar dados:", error);
+        toast.error("Erro ao carregar estatísticas");
       } finally {
         setLoading(false);
       }
@@ -33,122 +32,82 @@ const Estatisticas = () => {
   }, []);
 
   const totalObras = obras.length;
-  const totalFilmes = obras.filter(o => o.tipo === 'FILME').length;
-  const totalSeries = obras.filter(o => o.tipo === 'SERIE').length;
-  const totalConcluidas = obras.filter(o => o.status === 'ASSISTIDO').length;
-  const totalAssistindo = obras.filter(o => o.status === 'ASSISTINDO').length;
-  
+  const totalFilmes = obras.filter((o) => o.tipo === "filme").length;
+  const totalSeries = obras.filter((o) => o.tipo === "serie").length;
+  const totalConcluidas = obras.filter((o) => o.status === "assistido").length;
+  const totalAssistindo = obras.filter((o) => o.status === "assistindo").length;
+
   const tempoTotalMinutos = obras
-    .filter(o => o.duracaoMinutos)
+    .filter((o) => o.duracaoMinutos)
     .reduce((acc, o) => acc + o.duracaoMinutos, 0);
   const tempoTotalHoras = Math.floor(tempoTotalMinutos / 60);
-  
-  const mediaAvaliacoes = avaliacoes.length > 0
-    ? (avaliacoes.reduce((acc, a) => acc + a.nota, 0) / avaliacoes.length).toFixed(1)
-    : 0;
-  
+
   const obrasPorStatus = [
-    { status: 'Quero Assistir', count: obras.filter(o => o.status === 'QUERO_ASSISTIR').length, color: 'bg-blue-500' },
-    { status: 'Assistindo', count: obras.filter(o => o.status === 'ASSISTINDO').length, color: 'bg-yellow-500' },
-    { status: 'Assistido', count: obras.filter(o => o.status === 'ASSISTIDO').length, color: 'bg-purple-500' },
+    {
+      status: "Quero Assistir",
+      count: obras.filter((o) => o.status === "quero_assistir").length,
+      color: "bg-blue-500",
+    },
+    {
+      status: "Assistindo",
+      count: obras.filter((o) => o.status === "assistindo").length,
+      color: "bg-yellow-500",
+    },
+    {
+      status: "Assistido",
+      count: obras.filter((o) => o.status === "assistido").length,
+      color: "bg-purple-500",
+    },
   ];
-  
-  const maxStatusCount = Math.max(...obrasPorStatus.map(s => s.count), 1);
-  
-  const generosCount = {};
-  obras.forEach(obra => {
-    obra.generos?.forEach(genero => {
-      generosCount[genero.nome] = (generosCount[genero.nome] || 0) + 1;
-    });
-  });
-  
-  const topGeneros = Object.entries(generosCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([nome, count]) => ({ nome, count }));
-  
-  const maxGeneroCount = Math.max(...topGeneros.map(g => g.count), 1);
-  
-  const diretoresCount = {};
-  obras.forEach(obra => {
-    obra.diretores?.forEach(diretor => {
-      diretoresCount[diretor.nome] = (diretoresCount[diretor.nome] || 0) + 1;
-    });
-  });
-  
-  const topDiretores = Object.entries(diretoresCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([nome, count]) => ({ nome, count }));
-  
-  const maxDiretorCount = Math.max(...topDiretores.map(d => d.count), 1);
-  
+
+  const maxStatusCount = Math.max(...obrasPorStatus.map((s) => s.count), 1);
+
   const obrasPorAno = {};
-  obras.forEach(obra => {
+  obras.forEach((obra) => {
     if (obra.anoLancamento) {
-      obrasPorAno[obra.anoLancamento] = (obrasPorAno[obra.anoLancamento] || 0) + 1;
+      obrasPorAno[obra.anoLancamento] =
+        (obrasPorAno[obra.anoLancamento] || 0) + 1;
     }
   });
-  
+
   const anosOrdenados = Object.entries(obrasPorAno)
     .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-    .slice(-10) 
+    .slice(-10)
     .map(([ano, count]) => ({ ano, count }));
-  
-  const maxAnoCount = Math.max(...anosOrdenados.map(a => a.count), 1);
 
-  const plataformasCount = {};
-  obras.forEach(obra => {
-    obra.plataformas?.forEach(p => {
-      const key = p.nome || p.name;
-      if (key) plataformasCount[key] = (plataformasCount[key] || 0) + 1;
-    });
-  });
-  const topPlataformas = Object.entries(plataformasCount)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([nome, count]) => ({ nome, count }));
-  const maxPlataformaCount = Math.max(...topPlataformas.map(p => p.count), 1);
+  const maxAnoCount = Math.max(...anosOrdenados.map((a) => a.count), 1);
 
-  const filmesDuracoes = obras.filter(o => o.tipo === 'FILME' && o.duracaoMinutos).map(o => o.duracaoMinutos);
-  const seriesDuracoes = obras.filter(o => o.tipo === 'SERIE' && o.duracaoMinutos).map(o => o.duracaoMinutos);
-  const avg = arr => arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
+  const filmesDuracoes = obras
+    .filter((o) => o.tipo === "filme" && o.duracaoMinutos)
+    .map((o) => o.duracaoMinutos);
+  const seriesDuracoes = obras
+    .filter((o) => o.tipo === "serie" && o.duracaoMinutos)
+    .map((o) => o.duracaoMinutos);
+  const avg = (arr) =>
+    arr.length ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : 0;
   const mediaFilmeMin = avg(filmesDuracoes);
   const mediaSerieMin = avg(seriesDuracoes);
 
-  const filmes = obras.filter(o => o.tipo === 'FILME');
-  const series = obras.filter(o => o.tipo === 'SERIE');
-  const filmeMaiorNota = filmes.reduce((best, o) => (o.notaImdb || -1) > (best?.notaImdb || -1) ? o : best, null);
-  const filmeMaisLongo = filmes.reduce((longest, o) => (o.duracaoMinutos || 0) > (longest?.duracaoMinutos || 0) ? o : longest, null);
-  const serieMaisLonga = series.reduce((acc, o) => (o.totalEpisodios || 0) > (acc?.totalEpisodios || 0) ? o : acc, null);
-  const diretorNotasMap = {};
-  obras.forEach(o => {
-    if (o.notaImdb && o.diretores) {
-      o.diretores.forEach(d => {
-        const k = d.nome;
-        if (!k) return;
-        if (!diretorNotasMap[k]) diretorNotasMap[k] = [];
-        diretorNotasMap[k].push(o.notaImdb);
-      });
-    }
-  });
-  const diretorMaiorMedia = Object.entries(diretorNotasMap)
-    .map(([nome, notas]) => ({ nome, media: notas.reduce((a,b)=>a+b,0)/notas.length, qtd: notas.length }))
-    .sort((a,b)=> b.media - a.media)[0] || null;
-  const melhorPorGenero = {};
-  filmes.forEach(f => {
-    f.generos?.forEach(g => {
-      const n = g.nome;
-      if (!n) return;
-      if (!melhorPorGenero[n] || (f.notaImdb || 0) > (melhorPorGenero[n].notaImdb || 0)) {
-        melhorPorGenero[n] = f;
-      }
-    });
-  });
-  const melhoresGenerosLista = Object.entries(melhorPorGenero)
-    .map(([genero, obra]) => ({ genero, obra }))
-    .sort((a,b)=> (b.obra.notaImdb||0) - (a.obra.notaImdb||0))
-    .slice(0, 3);
+  const filmes = obras.filter((o) => o.tipo === "filme");
+  const series = obras.filter((o) => o.tipo === "serie");
+
+  const filmeMaiorNota = filmes.reduce((best, o) => {
+    const notaAtual = o.notaImdb;
+    const notaMelhor = best?.notaImdb;
+    return (notaAtual || -1) > (notaMelhor || -1) ? o : best;
+  }, filmes[0] || null);
+
+  const filmeMaisLongo = filmes.reduce(
+    (longest, o) =>
+      (o.duracaoMinutos || 0) > (longest?.duracaoMinutos || 0) ? o : longest,
+    filmes[0] || null
+  );
+
+  const serieMaisLonga = series.reduce(
+    (acc, o) =>
+      (o.totalEpisodios || 0) > (acc?.totalEpisodios || 0) ? o : acc,
+    series[0] || null
+  );
 
   if (loading) {
     return (
@@ -168,7 +127,9 @@ const Estatisticas = () => {
                 <BarChart3 className="w-10 h-10 text-purple-500" />
                 Estatísticas
               </h1>
-              <p className="text-gray-400">Análise completa da sua coleção de obras</p>
+              <p className="text-gray-400">
+                Análise completa da sua coleção de obras
+              </p>
             </div>
           </div>
         </div>
@@ -178,23 +139,33 @@ const Estatisticas = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
             <h4 className="text-sm text-gray-400 mb-1">Filme com maior nota</h4>
-            <p className="text-white text-lg font-semibold truncate">{filmeMaiorNota?.titulo || '—'}</p>
-            <p className="text-gray-400 text-sm mt-1">Nota: {filmeMaiorNota?.notaImdb?.toFixed?.(1) || '—'}</p>
-          </div>
-          <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-            <h4 className="text-sm text-gray-400 mb-1">Diretor com maior média</h4>
-            <p className="text-white text-lg font-semibold truncate">{diretorMaiorMedia?.nome || '—'}</p>
-            <p className="text-gray-400 text-sm mt-1">Média: {diretorMaiorMedia ? diretorMaiorMedia.media.toFixed(1) : '—'} ({diretorMaiorMedia?.qtd || 0} obras)</p>
+            <p className="text-white text-lg font-semibold truncate">
+              {filmeMaiorNota?.titulo || "—"}
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Nota: {filmeMaiorNota?.notaImdb?.toFixed?.(1) || "—"}
+            </p>
           </div>
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
             <h4 className="text-sm text-gray-400 mb-1">Filme mais longo</h4>
-            <p className="text-white text-lg font-semibold truncate">{filmeMaisLongo?.titulo || '—'}</p>
-            <p className="text-gray-400 text-sm mt-1">Duração: {filmeMaisLongo?.duracaoMinutos ? `${filmeMaisLongo.duracaoMinutos} min` : '—'}</p>
+            <p className="text-white text-lg font-semibold truncate">
+              {filmeMaisLongo?.titulo || "—"}
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Duração:{" "}
+              {filmeMaisLongo?.duracaoMinutos
+                ? `${filmeMaisLongo.duracaoMinutos} min`
+                : "—"}
+            </p>
           </div>
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
             <h4 className="text-sm text-gray-400 mb-1">Série mais longa</h4>
-            <p className="text-white text-lg font-semibold truncate">{serieMaisLonga?.titulo || '—'}</p>
-            <p className="text-gray-400 text-sm mt-1">Episódios: {serieMaisLonga?.totalEpisodios || '—'}</p>
+            <p className="text-white text-lg font-semibold truncate">
+              {serieMaisLonga?.titulo || "—"}
+            </p>
+            <p className="text-gray-400 text-sm mt-1">
+              Episódios: {serieMaisLonga?.totalEpisodios || "—"}
+            </p>
           </div>
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
             <div className="flex items-center justify-between mb-4">
@@ -203,9 +174,13 @@ const Estatisticas = () => {
               </div>
               <TrendingUp className="w-5 h-5 text-white/60" />
             </div>
-            <h3 className="text-white/80 text-sm font-medium mb-1">Total de Obras</h3>
+            <h3 className="text-white/80 text-sm font-medium mb-1">
+              Total de Obras
+            </h3>
             <p className="text-4xl font-bold text-white">{totalObras}</p>
-            <p className="text-white/60 text-xs mt-2">{totalFilmes} filmes • {totalSeries} séries</p>
+            <p className="text-white/60 text-xs mt-2">
+              {totalFilmes} filmes • {totalSeries} séries
+            </p>
           </div>
 
           <motion.div
@@ -220,9 +195,13 @@ const Estatisticas = () => {
               </div>
               <TrendingUp className="w-5 h-5 text-white/60" />
             </div>
-            <h3 className="text-white/80 text-sm font-medium mb-1">Concluídas</h3>
+            <h3 className="text-white/80 text-sm font-medium mb-1">
+              Concluídas
+            </h3>
             <p className="text-4xl font-bold text-white">{totalConcluidas}</p>
-            <p className="text-white/60 text-xs mt-2">{totalAssistindo} assistindo agora</p>
+            <p className="text-white/60 text-xs mt-2">
+              {totalAssistindo} assistindo agora
+            </p>
           </motion.div>
 
           <motion.div
@@ -237,26 +216,13 @@ const Estatisticas = () => {
               </div>
               <TrendingUp className="w-5 h-5 text-white/60" />
             </div>
-            <h3 className="text-white/80 text-sm font-medium mb-1">Tempo Assistido</h3>
+            <h3 className="text-white/80 text-sm font-medium mb-1">
+              Tempo Assistido
+            </h3>
             <p className="text-4xl font-bold text-white">{tempoTotalHoras}h</p>
-            <p className="text-white/60 text-xs mt-2">{tempoTotalMinutos.toLocaleString()} minutos</p>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-3 bg-white/20 rounded-lg">
-                <Star className="w-6 h-6 text-white" />
-              </div>
-              <TrendingUp className="w-5 h-5 text-white/60" />
-            </div>
-            <h3 className="text-white/80 text-sm font-medium mb-1">Média de Avaliações</h3>
-            <p className="text-4xl font-bold text-white">{mediaAvaliacoes}/10</p>
-            <p className="text-white/60 text-xs mt-2">{avaliacoes.length} avaliações feitas</p>
+            <p className="text-white/60 text-xs mt-2">
+              {tempoTotalMinutos.toLocaleString()} minutos
+            </p>
           </motion.div>
         </div>
 
@@ -276,104 +242,18 @@ const Estatisticas = () => {
                 <div key={index}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-300 text-sm">{item.status}</span>
-                    <span className="text-white font-semibold">{item.count}</span>
+                    <span className="text-white font-semibold">
+                      {item.count}
+                    </span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(item.count / maxStatusCount) * 100}%` }}
+                      animate={{
+                        width: `${(item.count / maxStatusCount) * 100}%`,
+                      }}
                       transition={{ duration: 0.8, delay: 0.5 + index * 0.1 }}
                       className={`h-full bg-purple-600 rounded-full`}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.55 }}
-            className="bg-gray-800/50 rounded-xl p-6 border border-gray-700"
-          >
-            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-purple-500" />
-              Top Plataformas
-            </h3>
-            <div className="space-y-4">
-              {topPlataformas.map((plataforma, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-300 text-sm">{plataforma.nome}</span>
-                    <span className="text-white font-semibold">{plataforma.count}</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(plataforma.count / maxPlataformaCount) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
-                      className="h-full bg-purple-600 rounded-full"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
-          >
-            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <Film className="w-5 h-5 text-purple-500" />
-              Top 5 Gêneros
-            </h3>
-            <div className="space-y-4">
-              {topGeneros.map((genero, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-300 text-sm">{genero.nome}</span>
-                    <span className="text-white font-semibold">{genero.count} obras</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(genero.count / maxGeneroCount) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
-                      className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-full"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-gray-700"
-          >
-            <h3 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
-              <Award className="w-5 h-5 text-purple-500" />
-              Top 5 Diretores
-            </h3>
-            <div className="space-y-4">
-              {topDiretores.map((diretor, index) => (
-                <div key={index}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-gray-300 text-sm">{diretor.nome}</span>
-                    <span className="text-white font-semibold">{diretor.count} obras</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${(diretor.count / maxDiretorCount) * 100}%` }}
-                      transition={{ duration: 0.8, delay: 0.7 + index * 0.1 }}
-                      className="h-full bg-purple-600 rounded-full"
                     />
                   </div>
                 </div>
@@ -396,12 +276,16 @@ const Estatisticas = () => {
                 <div key={index}>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-gray-300 text-sm">{item.ano}</span>
-                    <span className="text-white font-semibold">{item.count} obras</span>
+                    <span className="text-white font-semibold">
+                      {item.count} obras
+                    </span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(item.count / maxAnoCount) * 100}%` }}
+                      animate={{
+                        width: `${(item.count / maxAnoCount) * 100}%`,
+                      }}
                       transition={{ duration: 0.8, delay: 0.8 + index * 0.05 }}
                       className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-full"
                     />
@@ -410,19 +294,6 @@ const Estatisticas = () => {
               ))}
             </div>
           </motion.div>
-        </div>
-
-        <div className="mt-6 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
-          <h3 className="text-xl font-semibold text-white mb-4">Melhor filme por gênero</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {melhoresGenerosLista.map(item => (
-              <div key={item.genero} className="bg-gray-900/40 rounded-lg p-4 border border-gray-700">
-                <p className="text-sm text-gray-400 mb-1">{item.genero}</p>
-                <p className="text-white font-semibold truncate">{item.obra?.titulo || '—'}</p>
-                <p className="text-gray-400 text-sm mt-1">Nota: {item.obra?.notaImdb?.toFixed?.(1) || '—'}</p>
-              </div>
-            ))}
-          </div>
         </div>
 
         <motion.div
@@ -439,24 +310,34 @@ const Estatisticas = () => {
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-gray-300 text-sm">Filmes</span>
-                <span className="text-white font-semibold">{mediaFilmeMin} min</span>
+                <span className="text-white font-semibold">
+                  {mediaFilmeMin} min
+                </span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-full"
-                  style={{ width: `${Math.min(100, (mediaFilmeMin / 180) * 100)}%` }}
+                  style={{
+                    width: `${Math.min(100, (mediaFilmeMin / 180) * 100)}%`,
+                  }}
                 />
               </div>
             </div>
             <div>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-gray-300 text-sm">Séries (por episódio)</span>
-                <span className="text-white font-semibold">{mediaSerieMin} min</span>
+                <span className="text-gray-300 text-sm">
+                  Séries (por episódio)
+                </span>
+                <span className="text-white font-semibold">
+                  {mediaSerieMin} min
+                </span>
               </div>
               <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-purple-600 via-fuchsia-600 to-pink-600 rounded-full"
-                  style={{ width: `${Math.min(100, (mediaSerieMin / 60) * 100)}%` }}
+                  style={{
+                    width: `${Math.min(100, (mediaSerieMin / 60) * 100)}%`,
+                  }}
                 />
               </div>
             </div>
@@ -469,23 +350,22 @@ const Estatisticas = () => {
           transition={{ delay: 0.8 }}
           className="mt-6 bg-gray-800/50 rounded-xl p-6 border border-gray-700"
         >
-          <h3 className="text-xl font-semibold text-white mb-4"> Resumo Geral</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <h3 className="text-xl font-semibold text-white mb-4">
+            {" "}
+            Resumo Geral
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-400">{totalFilmes}</p>
+              <p className="text-3xl font-bold text-purple-400">
+                {totalFilmes}
+              </p>
               <p className="text-gray-400 text-sm mt-1">Filmes</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-purple-400">{totalSeries}</p>
+              <p className="text-3xl font-bold text-purple-400">
+                {totalSeries}
+              </p>
               <p className="text-gray-400 text-sm mt-1">Séries</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-purple-400">{Object.keys(generosCount).length}</p>
-              <p className="text-gray-400 text-sm mt-1">Gêneros Diferentes</p>
-            </div>
-            <div className="text-center">
-              <p className="text-3xl font-bold text-purple-400">{Object.keys(diretoresCount).length}</p>
-              <p className="text-gray-400 text-sm mt-1">Diretores Diferentes</p>
             </div>
           </div>
         </motion.div>

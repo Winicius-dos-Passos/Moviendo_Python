@@ -213,7 +213,6 @@ const ObraModal = ({ isOpen, onClose, obra = null, onSuccess }) => {
       const novoGenero = await generosService.create({ nome });
       setGeneros([...generos, novoGenero]);
       setSelectedGeneros([...selectedGeneros, novoGenero.id]);
-      toast.success(`Gênero "${novoGenero.nome}" criado com sucesso!`);
     } catch (error) {
       console.error("Erro ao criar gênero:", error);
       toast.error(error.response?.data?.message || "Erro ao criar gênero");
@@ -264,7 +263,6 @@ const ObraModal = ({ isOpen, onClose, obra = null, onSuccess }) => {
       const novoDiretor = await diretoresService.create({ nome });
       setDiretores([...diretores, novoDiretor]);
       setSelectedDiretores([...selectedDiretores, novoDiretor.id]);
-      toast.success(`Diretor "${novoDiretor.nome}" criado com sucesso!`);
     } catch (error) {
       console.error("Erro ao criar diretor:", error);
       toast.error(error.response?.data?.message || "Erro ao criar diretor");
@@ -816,11 +814,9 @@ const ObraModal = ({ isOpen, onClose, obra = null, onSuccess }) => {
         onSelect={handleTmdbSelect}
         onCreateGenero={async (nome) => {
           await handleSubmitGenero(nome);
-          toast.success(`Gênero "${nome}" criado!`);
         }}
         onCreateDiretor={async (nome) => {
           await handleSubmitDiretor(nome);
-          toast.success(`Diretor "${nome}" criado!`);
         }}
         existingGeneros={generos}
         existingDiretores={diretores}

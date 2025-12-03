@@ -37,6 +37,14 @@ class Obra(models.Model):
     url_capa = models.URLField(max_length=255, null=True, blank=True, verbose_name="URL da Capa")
     tipo = models.CharField(max_length=20, choices=TipoObra.choices, verbose_name="Tipo")
     status = models.CharField(max_length=20, choices=StatusObra.choices, verbose_name="Status")
+    nota_imdb = models.DecimalField(
+        max_digits=3,
+        decimal_places=1,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)],
+        verbose_name="Nota IMDB"
+    )
     
     total_episodios = models.IntegerField(
         null=True, 

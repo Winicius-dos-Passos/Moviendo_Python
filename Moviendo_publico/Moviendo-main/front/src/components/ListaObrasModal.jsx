@@ -19,14 +19,8 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
   const [obraToRemove, setObraToRemove] = useState(null);
   const [selectedRandomObra, setSelectedRandomObra] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && lista) {
-      loadListaObras();
-      loadTodasObras();
-    }
-  }, [isOpen, lista]);
-
   const loadListaObras = useCallback(async () => {
+    if (!lista?.id) return;
     try {
       const data = await listasService.getById(lista.id);
       setObras(data.obrasInfo || []);
@@ -34,7 +28,7 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
       console.error('Erro ao carregar obras da lista:', error);
       toast.error('Erro ao carregar obras da lista');
     }
-  }, [lista]);
+  }, [lista?.id]);
 
   const loadTodasObras = useCallback(async () => {
     try {
@@ -44,6 +38,13 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
       console.error('Erro ao carregar obras:', error);
     }
   }, []);
+
+  useEffect(() => {
+    if (isOpen && lista) {
+      loadListaObras();
+      loadTodasObras();
+    }
+  }, [isOpen, lista, loadListaObras, loadTodasObras]);
 
   const handleAddObra = async (obraId) => {
     setLoading(true);
@@ -109,13 +110,15 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
         <div className="space-y-6 mt-6">
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
-              <Button
-                onClick={() => setShowAddObras(!showAddObras)}
-                className="bg-purple-600 hover:bg-purple-700 text-white"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Adicionar Obras
-              </Button>
+              {!showAddObras && (
+                <Button
+                  onClick={() => setShowAddObras(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Adicionar Obras
+                </Button>
+              )}
               {obras.length > 0 && (
                 <Button
                   onClick={handleRandomObra}
@@ -130,6 +133,17 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
           </div>
           {showAddObras && (
             <div className="border border-gray-800 rounded-lg p-4 space-y-4">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-lg font-semibold text-white">Adicionar Obras</h3>
+                <Button
+                  onClick={() => setShowAddObras(false)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-gray-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
               <div className="flex items-center gap-2">
                 <Search className="w-5 h-5 text-gray-400" />
                 <Input
@@ -226,9 +240,7 @@ const ListaObrasModal = ({ isOpen, onClose, lista }) => {
                     </div>
                   </div>
                   <Button
-                    onClick={(e) => {
-                      setObraToRemove(obra);
-                    }}
+                    onClick={() => setObraToRemove(obra)}
                     variant="ghost"
                     size="sm"
                     className="text-red-400 hover:text-red-300 hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-opacity"

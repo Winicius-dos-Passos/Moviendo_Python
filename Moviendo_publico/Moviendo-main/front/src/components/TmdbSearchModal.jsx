@@ -267,7 +267,7 @@ const TmdbSearchModal = ({
                 selectedDetails.createdBy && (
                   <div>
                     <h4 className="text-sm font-semibold text-purple-400 mb-2">
-                      Criadores do TMDB:
+                      Diretores do TMDB:
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedDetails.createdBy.map((creator) => {

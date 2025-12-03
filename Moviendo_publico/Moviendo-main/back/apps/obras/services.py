@@ -50,6 +50,13 @@ class ObraService:
             tempos = dados.get('episode_run_time', [])
             duracao = tempos[0] if tempos else 0
 
+        nota_imdb = dados.get('vote_average')
+        if nota_imdb is not None:
+            try:
+                nota_imdb = round(float(nota_imdb), 1)
+            except (ValueError, TypeError):
+                nota_imdb = None
+
         obra = Obra(
             titulo=titulo,
             sinopse=dados.get('overview', ''),
@@ -58,6 +65,7 @@ class ObraService:
             url_capa=self._montar_url_capa(dados.get('poster_path')),
             tipo=TipoObra.FILME if eh_filme else TipoObra.SERIE,
             status=StatusObra.QUERO_ASSISTIR,
+            nota_imdb=nota_imdb,
             total_temporadas=dados.get('number_of_seasons') if not eh_filme else None,
             total_episodios=dados.get('number_of_episodes') if not eh_filme else None,
         )

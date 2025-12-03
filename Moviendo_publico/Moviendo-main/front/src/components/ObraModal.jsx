@@ -116,10 +116,16 @@ const ObraModal = ({ isOpen, onClose, obra = null, onSuccess }) => {
       totalEpisodios: obraData.totalEpisodios || "",
       dataAssistido: obraData.dataAssistido || "",
     });
-    setSelectedGeneros(obraData.generos?.map((g) => g.id) || []);
-    setSelectedPlataformas(obraData.plataformas?.map((p) => p.id) || []);
-    setSelectedTags(obraData.tags?.map((t) => t.id) || []);
-    setSelectedDiretores(obraData.diretores?.map((d) => d.id) || []);
+    
+    const generos = obraData.generosInfo || obraData.generos_info || obraData.generos || [];
+    const plataformas = obraData.plataformasInfo || obraData.plataformas_info || obraData.plataformas || [];
+    const tags = obraData.tagsInfo || obraData.tags_info || obraData.tags || [];
+    const diretores = obraData.diretoresInfo || obraData.diretores_info || obraData.diretores || [];
+    
+    setSelectedGeneros(generos.map((g) => g.id));
+    setSelectedPlataformas(plataformas.map((p) => p.id));
+    setSelectedTags(tags.map((t) => t.id));
+    setSelectedDiretores(diretores.map((d) => d.id));
   };
 
   const resetForm = () => {
@@ -170,10 +176,10 @@ const ObraModal = ({ isOpen, onClose, obra = null, onSuccess }) => {
         totalEpisodios: formData.totalEpisodios
           ? parseInt(formData.totalEpisodios)
           : null,
-        generosIds: selectedGeneros,
-        plataformasIds: selectedPlataformas,
-        tagsIds: selectedTags,
-        diretoresIds: selectedDiretores,
+        generos: selectedGeneros,
+        plataformas: selectedPlataformas,
+        tags: selectedTags,
+        diretores: selectedDiretores,
       };
 
       if (isEditing) {

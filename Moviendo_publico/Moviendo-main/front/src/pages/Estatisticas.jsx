@@ -91,11 +91,19 @@ const Estatisticas = () => {
   const filmes = obras.filter((o) => o.tipo === "filme");
   const series = obras.filter((o) => o.tipo === "serie");
 
-  const filmeMaiorNota = filmes.reduce((best, o) => {
-    const notaAtual = o.notaImdb;
-    const notaMelhor = best?.notaImdb;
-    return (notaAtual || -1) > (notaMelhor || -1) ? o : best;
-  }, filmes[0] || null);
+  const filmesComNota = filmes.filter((o) => {
+    const nota = Number(o.notaImdb);
+    return !isNaN(nota) && nota > 0;
+  });
+
+  const filmeMaiorNota =
+    filmesComNota.length > 0
+      ? filmesComNota.reduce((best, o) => {
+          const notaAtual = Number(o.notaImdb) || -1;
+          const notaMelhor = Number(best?.notaImdb) || -1;
+          return notaAtual > notaMelhor ? o : best;
+        }, filmesComNota[0])
+      : null;
 
   const filmeMaisLongo = filmes.reduce(
     (longest, o) =>
@@ -143,7 +151,10 @@ const Estatisticas = () => {
               {filmeMaiorNota?.titulo || "—"}
             </p>
             <p className="text-gray-400 text-sm mt-1">
-              Nota: {filmeMaiorNota?.notaImdb?.toFixed?.(1) || "—"}
+              Nota:{" "}
+              {filmeMaiorNota?.notaImdb
+                ? Number(filmeMaiorNota.notaImdb).toFixed(1)
+                : "—"}
             </p>
           </div>
           <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">

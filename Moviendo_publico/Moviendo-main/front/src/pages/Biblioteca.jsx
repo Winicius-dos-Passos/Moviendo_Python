@@ -1,38 +1,48 @@
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
-import { Calendar, Eye, Film, Filter, Grid3x3, List, Search, Star, Tv } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import ObraDetailsModal from '../components/ObraDetailsModal';
-import ObraModal from '../components/ObraModal';
-import { STATUS_OPTIONS } from '../constants/status';
-import diretoresService from '../services/diretoresService';
-import generosService from '../services/generosService';
-import obrasService from '../services/obrasService';
-import plataformasService from '../services/plataformasService';
-import tagsService from '../services/tagsService';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import {
+  Calendar,
+  Eye,
+  Film,
+  Filter,
+  Grid3x3,
+  List,
+  Search,
+  Star,
+  Tv,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import ObraDetailsModal from "../components/ObraDetailsModal";
+import ObraModal from "../components/ObraModal";
+import { STATUS_OPTIONS } from "../constants/status";
+import diretoresService from "../services/diretoresService";
+import generosService from "../services/generosService";
+import obrasService from "../services/obrasService";
+import plataformasService from "../services/plataformasService";
+import tagsService from "../services/tagsService";
 
 const Biblioteca = () => {
   const [obras, setObras] = useState([]);
   const [filteredObras, setFilteredObras] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState('grid');
-  
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGenero, setSelectedGenero] = useState('');
-  const [selectedPlataforma, setSelectedPlataforma] = useState('');
-  const [selectedTag, setSelectedTag] = useState('');
-  const [selectedDiretor, setSelectedDiretor] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
-  const [selectedAno, setSelectedAno] = useState('');
-  const [sortBy, setSortBy] = useState('titulo');
-  
+  const [viewMode, setViewMode] = useState("grid");
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedGenero, setSelectedGenero] = useState("");
+  const [selectedPlataforma, setSelectedPlataforma] = useState("");
+  const [selectedTag, setSelectedTag] = useState("");
+  const [selectedDiretor, setSelectedDiretor] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedAno, setSelectedAno] = useState("");
+  const [sortBy, setSortBy] = useState("titulo");
+
   const [generos, setGeneros] = useState([]);
   const [plataformas, setPlataformas] = useState([]);
   const [tags, setTags] = useState([]);
   const [diretores, setDiretores] = useState([]);
-  
+
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedObra, setSelectedObra] = useState(null);
@@ -40,14 +50,20 @@ const Biblioteca = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [obrasData, generosData, plataformasData, tagsData, diretoresData] = await Promise.all([
+        const [
+          obrasData,
+          generosData,
+          plataformasData,
+          tagsData,
+          diretoresData,
+        ] = await Promise.all([
           obrasService.getAll(),
           generosService.getAll(),
           plataformasService.getAll(),
           tagsService.getAll(),
           diretoresService.getAll(),
         ]);
-        
+
         setObras(obrasData);
         setFilteredObras(obrasData);
         setGeneros(generosData);
@@ -55,8 +71,8 @@ const Biblioteca = () => {
         setTags(tagsData);
         setDiretores(diretoresData);
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        toast.error('Erro ao carregar biblioteca');
+        console.error("Erro ao carregar dados:", error);
+        toast.error("Erro ao carregar biblioteca");
       } finally {
         setLoading(false);
       }
@@ -69,56 +85,88 @@ const Biblioteca = () => {
     let result = [...obras];
 
     if (searchTerm) {
-      result = result.filter(obra =>
+      result = result.filter((obra) =>
         obra.titulo.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedGenero) {
-      result = result.filter(obra =>
-        (obra.generos_info || obra.generos)?.some(g => g.id == selectedGenero)
-      );
+      result = result.filter((obra) => {
+        const generos =
+          (obra.generosInfo?.length ? obra.generosInfo : null) ||
+          (obra.generos_info?.length ? obra.generos_info : null) ||
+          (obra.generos?.length ? obra.generos : null) ||
+          [];
+        return generos.some((g) => g.id == selectedGenero);
+      });
     }
 
     if (selectedPlataforma) {
-      result = result.filter(obra =>
-        (obra.plataformas_info || obra.plataformas)?.some(p => p.id == selectedPlataforma)
-      );
+      result = result.filter((obra) => {
+        const plataformas =
+          (obra.plataformasInfo?.length ? obra.plataformasInfo : null) ||
+          (obra.plataformas_info?.length ? obra.plataformas_info : null) ||
+          (obra.plataformas?.length ? obra.plataformas : null) ||
+          [];
+        return plataformas.some((p) => p.id == selectedPlataforma);
+      });
     }
 
     if (selectedTag) {
-      result = result.filter(obra =>
-        (obra.tags_info || obra.tags)?.some(t => t.id == selectedTag)
-      );
+      result = result.filter((obra) => {
+        const tags =
+          (obra.tagsInfo?.length ? obra.tagsInfo : null) ||
+          (obra.tags_info?.length ? obra.tags_info : null) ||
+          (obra.tags?.length ? obra.tags : null) ||
+          [];
+        return tags.some((t) => t.id == selectedTag);
+      });
     }
 
     if (selectedDiretor) {
-      result = result.filter(obra =>
-        (obra.diretores_info || obra.diretores)?.some(d => d.id == selectedDiretor)
-      );
+      result = result.filter((obra) => {
+        const diretores =
+          (obra.diretoresInfo?.length ? obra.diretoresInfo : null) ||
+          (obra.diretores_info?.length ? obra.diretores_info : null) ||
+          (obra.diretores?.length ? obra.diretores : null) ||
+          [];
+        return diretores.some((d) => d.id == selectedDiretor);
+      });
     }
 
     if (selectedStatus) {
-      result = result.filter(obra => obra.status === selectedStatus);
+      result = result.filter((obra) => obra.status === selectedStatus);
     }
 
     if (selectedAno) {
-      result = result.filter(obra => obra.anoLancamento === parseInt(selectedAno));
+      result = result.filter(
+        (obra) => obra.anoLancamento === parseInt(selectedAno)
+      );
     }
 
     result.sort((a, b) => {
-      if (sortBy === 'titulo') {
+      if (sortBy === "titulo") {
         return a.titulo.localeCompare(b.titulo);
-      } else if (sortBy === 'ano') {
+      } else if (sortBy === "ano") {
         return (b.anoLancamento || 0) - (a.anoLancamento || 0);
-      } else if (sortBy === 'nota') {
+      } else if (sortBy === "nota") {
         return (b.notaImdb || 0) - (a.notaImdb || 0);
       }
       return 0;
     });
 
     setFilteredObras(result);
-  }, [obras, searchTerm, selectedGenero, selectedPlataforma, selectedTag, selectedDiretor, selectedStatus, selectedAno, sortBy]);
+  }, [
+    obras,
+    searchTerm,
+    selectedGenero,
+    selectedPlataforma,
+    selectedTag,
+    selectedDiretor,
+    selectedStatus,
+    selectedAno,
+    sortBy,
+  ]);
 
   const handleCardClick = (obra) => {
     setSelectedObra(obra);
@@ -131,10 +179,37 @@ const Biblioteca = () => {
 
   const handleUpdateObra = () => {
     setLoading(true);
-    obrasService.getAll().then(data => {
-      setObras(data);
-      setFilteredObras(data);
-    }).finally(() => setLoading(false));
+    obrasService
+      .getAll()
+      .then((data) => {
+        setObras(data);
+        setFilteredObras(data);
+      })
+      .finally(() => setLoading(false));
+  };
+
+  const refreshFilters = async () => {
+    try {
+      const [generosData, plataformasData, tagsData, diretoresData] =
+        await Promise.all([
+          generosService.getAll(),
+          plataformasService.getAll(),
+          tagsService.getAll(),
+          diretoresService.getAll(),
+        ]);
+
+      setGeneros(generosData);
+      setPlataformas(plataformasData);
+      setTags(tagsData);
+      setDiretores(diretoresData);
+    } catch (error) {
+      console.error("Erro ao recarregar filtros:", error);
+    }
+  };
+
+  const handleObraModalSuccess = () => {
+    handleUpdateObra();
+    refreshFilters();
   };
 
   const handleEditFromDetails = (obra) => {
@@ -151,17 +226,19 @@ const Biblioteca = () => {
   };
 
   const limparFiltros = () => {
-    setSearchTerm('');
-    setSelectedGenero('');
-    setSelectedPlataforma('');
-    setSelectedTag('');
-    setSelectedDiretor('');
-    setSelectedStatus('');
-    setSelectedAno('');
-    setSortBy('titulo');
+    setSearchTerm("");
+    setSelectedGenero("");
+    setSelectedPlataforma("");
+    setSelectedTag("");
+    setSelectedDiretor("");
+    setSelectedStatus("");
+    setSelectedAno("");
+    setSortBy("titulo");
   };
 
-  const anos = [...new Set(obras.map(o => o.anoLancamento).filter(Boolean))].sort((a, b) => b - a);
+  const anos = [
+    ...new Set(obras.map((o) => o.anoLancamento).filter(Boolean)),
+  ].sort((a, b) => b - a);
 
   if (loading) {
     return (
@@ -179,18 +256,22 @@ const Biblioteca = () => {
             <div>
               <h1 className="text-4xl font-bold text-white mb-2">Biblioteca</h1>
               <p className="text-gray-400">
-                {filteredObras.length} {filteredObras.length === 1 ? 'obra encontrada' : 'obras encontradas'}
+                {filteredObras.length}{" "}
+                {filteredObras.length === 1
+                  ? "obra encontrada"
+                  : "obras encontradas"}
               </p>
             </div>
 
             <div className="flex items-center gap-2 bg-gray-800/50 rounded-xl p-1 border border-gray-700">
               <button
-                onClick={() => setViewMode('grid')}
+                onClick={() => setViewMode("grid")}
                 className={`
                   px-4 py-2 rounded-lg flex items-center gap-2 transition-all
-                  ${viewMode === 'grid'
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  ${
+                    viewMode === "grid"
+                      ? "bg-purple-600 text-white shadow-lg"
+                      : "text-gray-400 hover:text-white hover:bg-gray-700/50"
                   }
                 `}
               >
@@ -199,12 +280,13 @@ const Biblioteca = () => {
               </button>
 
               <button
-                onClick={() => setViewMode('list')}
+                onClick={() => setViewMode("list")}
                 className={`
                   px-4 py-2 rounded-lg flex items-center gap-2 transition-all
-                  ${viewMode === 'list'
-                    ? 'bg-purple-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  ${
+                    viewMode === "list"
+                      ? "bg-purple-600 text-white shadow-lg"
+                      : "text-gray-400 hover:text-white hover:bg-gray-700/50"
                   }
                 `}
               >
@@ -233,8 +315,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todos os gêneros</option>
-                {generos.map(genero => (
-                  <option key={genero.id} value={genero.id}>{genero.nome || genero.name}</option>
+                {generos.map((genero) => (
+                  <option key={genero.id} value={genero.id}>
+                    {genero.nome || genero.name}
+                  </option>
                 ))}
               </select>
 
@@ -244,8 +328,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todas as plataformas</option>
-                {plataformas.map(plataforma => (
-                  <option key={plataforma.id} value={plataforma.id}>{plataforma.nome || plataforma.name}</option>
+                {plataformas.map((plataforma) => (
+                  <option key={plataforma.id} value={plataforma.id}>
+                    {plataforma.nome || plataforma.name}
+                  </option>
                 ))}
               </select>
 
@@ -255,8 +341,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todas as tags</option>
-                {tags.map(tag => (
-                  <option key={tag.id} value={tag.id}>{tag.nome || tag.name}</option>
+                {tags.map((tag) => (
+                  <option key={tag.id} value={tag.id}>
+                    {tag.nome || tag.name}
+                  </option>
                 ))}
               </select>
 
@@ -266,8 +354,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todos os diretores</option>
-                {diretores.map(diretor => (
-                  <option key={diretor.id} value={diretor.id}>{diretor.nome || diretor.name}</option>
+                {diretores.map((diretor) => (
+                  <option key={diretor.id} value={diretor.id}>
+                    {diretor.nome || diretor.name}
+                  </option>
                 ))}
               </select>
 
@@ -277,8 +367,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todos os status</option>
-                {STATUS_OPTIONS.map(status => (
-                  <option key={status.value} value={status.value}>{status.label}</option>
+                {STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>
+                    {status.label}
+                  </option>
                 ))}
               </select>
 
@@ -288,8 +380,10 @@ const Biblioteca = () => {
                 className="bg-gray-800/50 border border-gray-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-purple-500"
               >
                 <option value="">Todos os anos</option>
-                {anos.map(ano => (
-                  <option key={ano} value={ano}>{ano}</option>
+                {anos.map((ano) => (
+                  <option key={ano} value={ano}>
+                    {ano}
+                  </option>
                 ))}
               </select>
 
@@ -304,7 +398,13 @@ const Biblioteca = () => {
               </select>
             </div>
 
-            {(searchTerm || selectedGenero || selectedPlataforma || selectedTag || selectedDiretor || selectedStatus || selectedAno) && (
+            {(searchTerm ||
+              selectedGenero ||
+              selectedPlataforma ||
+              selectedTag ||
+              selectedDiretor ||
+              selectedStatus ||
+              selectedAno) && (
               <Button
                 onClick={limparFiltros}
                 variant="outline"
@@ -322,11 +422,13 @@ const Biblioteca = () => {
       <div className="max-w-[1800px] mx-auto px-8 py-8">
         {filteredObras.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-gray-400 text-lg">Nenhuma obra encontrada com os filtros selecionados</p>
+            <p className="text-gray-400 text-lg">
+              Nenhuma obra encontrada com os filtros selecionados
+            </p>
           </div>
-        ) : viewMode === 'grid' ? (
+        ) : viewMode === "grid" ? (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-            {filteredObras.map(obra => (
+            {filteredObras.map((obra) => (
               <motion.div
                 key={obra.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -343,7 +445,7 @@ const Biblioteca = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-                      {obra.tipo === 'SERIE' ? (
+                      {obra.tipo === "SERIE" ? (
                         <Tv className="w-16 h-16 text-gray-600" />
                       ) : (
                         <Film className="w-16 h-16 text-gray-600" />
@@ -362,18 +464,22 @@ const Biblioteca = () => {
                   </div>
 
                   <div className="absolute top-2 right-2 bg-black/70 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
-                    {obra.tipo === 'SERIE' ? (
+                    {obra.tipo === "SERIE" ? (
                       <Tv className="w-3 h-3 text-purple-400" />
                     ) : (
                       <Film className="w-3 h-3 text-purple-400" />
                     )}
-                    <span className="text-xs text-white font-medium">{obra.tipo}</span>
+                    <span className="text-xs text-white font-medium">
+                      {obra.tipo}
+                    </span>
                   </div>
 
                   {obra.notaImdb && (
                     <div className="absolute bottom-2 left-2 bg-yellow-500/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1">
                       <Star className="w-3 h-3 text-yellow-900 fill-yellow-900" />
-                      <span className="text-xs text-yellow-900 font-bold">{obra.notaImdb.toFixed(1)}</span>
+                      <span className="text-xs text-yellow-900 font-bold">
+                        {Number(obra.notaImdb).toFixed(1)}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -394,7 +500,7 @@ const Biblioteca = () => {
           </div>
         ) : (
           <div className="space-y-3">
-            {filteredObras.map(obra => (
+            {filteredObras.map((obra) => (
               <motion.div
                 key={obra.id}
                 initial={{ opacity: 0, x: -20 }}
@@ -412,7 +518,7 @@ const Biblioteca = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
-                      {obra.tipo === 'SERIE' ? (
+                      {obra.tipo === "SERIE" ? (
                         <Tv className="w-8 h-8 text-gray-600" />
                       ) : (
                         <Film className="w-8 h-8 text-gray-600" />
@@ -422,7 +528,9 @@ const Biblioteca = () => {
                 </div>
 
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-white font-semibold text-lg mb-1">{obra.titulo}</h3>
+                  <h3 className="text-white font-semibold text-lg mb-1">
+                    {obra.titulo}
+                  </h3>
                   <div className="flex items-center gap-4 text-sm text-gray-400">
                     {obra.anoLancamento && (
                       <div className="flex items-center gap-1">
@@ -433,11 +541,13 @@ const Biblioteca = () => {
                     {obra.notaImdb && (
                       <div className="flex items-center gap-1">
                         <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                        <span className="text-yellow-400 font-medium">{obra.notaImdb.toFixed(1)}</span>
+                        <span className="text-yellow-400 font-medium">
+                          {Number(obra.notaImdb).toFixed(1)}
+                        </span>
                       </div>
                     )}
                     <div className="flex items-center gap-1">
-                      {obra.tipo === 'SERIE' ? (
+                      {obra.tipo === "SERIE" ? (
                         <Tv className="w-4 h-4 text-purple-400" />
                       ) : (
                         <Film className="w-4 h-4 text-purple-400" />
@@ -446,19 +556,23 @@ const Biblioteca = () => {
                     </div>
                   </div>
 
-                  {(obra.generos_info || obra.generos) && (obra.generos_info || obra.generos).length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {(obra.generos_info || obra.generos).slice(0, 3).map(genero => (
-                        <Badge
-                          key={genero.id}
-                          variant="secondary"
-                          className="text-xs bg-purple-900/30 text-purple-300 px-2 py-0.5"
-                        >
-                          {genero.nome}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
+                  {(obra.generosInfo || obra.generos_info || obra.generos) &&
+                    (obra.generosInfo || obra.generos_info || obra.generos)
+                      .length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {(obra.generosInfo || obra.generos_info || obra.generos)
+                          .slice(0, 3)
+                          .map((genero) => (
+                            <Badge
+                              key={genero.id}
+                              variant="secondary"
+                              className="text-xs bg-purple-900/30 text-purple-300 px-2 py-0.5"
+                            >
+                              {genero.nome}
+                            </Badge>
+                          ))}
+                      </div>
+                    )}
                 </div>
 
                 <Button
@@ -488,7 +602,7 @@ const Biblioteca = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         obra={selectedObra}
-        onSuccess={handleUpdateObra}
+        onSuccess={handleObraModalSuccess}
       />
     </div>
   );
